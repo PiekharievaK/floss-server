@@ -2,9 +2,9 @@ const express = require("express");
 const logger = require("morgan");
 const cors = require("cors");
 require("dotenv").config();
-const contactsRouter = require("./routes/api/contacts");
 const authRouter = require("./routes/api/auth");
 const flossRouter = require("./routes/api/floss");
+const userFlossesRouter = require("./routes/api/userFlosses");
 const app = express();
 
 const formatsLogger = app.get("env") === "development" ? "dev" : "short";
@@ -15,7 +15,7 @@ app.use(express.json());
 app.use(express.static("public"));
 app.use("/DMCflossCollection", flossRouter);
 app.use("/users", authRouter);
-app.use("/contacts", contactsRouter);
+app.use("/journal", userFlossesRouter);
 
 
 app.get("/", (req, res) => {

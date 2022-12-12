@@ -1,5 +1,5 @@
 const {
-    Floss,
+    DMCFlosses,
     // addValidate,
     // updateValidate,
     // updateFavorite,
@@ -8,7 +8,7 @@ const {
 
   const getFlossCollection = async (req, res, next) => {
   try {
-      const collection = await Floss.find({});
+      const collection = await DMCFlosses.find({});
       
       res.status(200).json(collection);
     } catch (e) {

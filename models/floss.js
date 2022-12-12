@@ -50,11 +50,11 @@ const flossSchema = Schema(
 //   favorite: Joi.bool().required(),
 // });
 
-const Floss = model("dmcfloss", flossSchema);
+const DMCFlosses = model("dmcfloss", flossSchema);
 
 module.exports = {
 //   addValidate,
 //   updateValidate,
 //   updateFavorite,
-  Floss,
+DMCFlosses,
 };

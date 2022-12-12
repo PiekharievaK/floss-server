@@ -1,35 +1,37 @@
 const {
-    Contact,
+    UserCollection,
     addValidate,
     updateValidate,
     updateFavorite,
-  } = require("../models/contact");
+  } = require("../models/userCollection");
   
   const getAll = async (req, res, next) => {
-    const {_id} = req.user
+    const id = req.body.user._id
     try {
-      const contacts = await Contact.find({owner: _id}).populate("owner", "_id, email" );
-      res.status(200).json(contacts);
+      const flosses = await UserCollection.findOne({owner: id}).populate("owner", "_id, email" );
+      console.log(flosses);
+      
+      res.status(200).json(flosses);
     } catch (e) {
-      res.status(204).json({ message: "No contacts" });
+      res.status(204).json({ message: "No flosses" });
       next(e);
     }
   };
   
-  const getContactById = async (req, res, next) => {
+  const getFlossById = async (req, res, next) => {
     try {
-      const contact = await Contact.findById(req.params.contactId);
-      if (!contact) {
+      const flosses = await UserCollection.findById(req.params.flossId);
+      if (!flosses) {
         throw new Error();
       }
-      res.status(200).json(contact);
+      res.status(200).json(flosses);
     } catch (e) {
       res.status(404).json({ message: "Not found" });
       next(e);
     }
   };
   
-  const addNewContact = async (req, res, next) => {
+  const addNewFloss = async (req, res, next) => {
     const { error } = addValidate.validate(req.body);
   
     try {
@@ -37,32 +39,32 @@ const {
         throw new Error(error.message);
       }
       const {_id} = req.user;
-      const contact = await Contact.create({...req.body, owner: _id} );
-      if (!contact) {
-        throw new Error("Contact with this name has already been in contacts");
+      const floss = await UserCollection.create({...req.body, owner: _id} );
+      if (!floss) {
+        throw new Error("Floss with this nunber has already been in your journal");
       }
    
-      res.status(201).json({ contact: contact });
+      res.status(201).json({ floss: floss });
     } catch (e) {
       res.status(400).json({ message: e.message });
       next(e);
     }
   };
   
-  const deleteContact = async (req, res, next) => {
+  const deleteFloss = async (req, res, next) => {
     try {
-      const contact = await Contact.findByIdAndDelete(req.params.contactId);
-      if (!contact) {
+      const floss = await UserCollection.findByIdAndDelete(req.params.flossId);
+      if (!floss) {
         throw new Error();
       }
-      res.status(200).json({ message: "contact deleted" });
+      res.status(200).json({ message: "floss deleted" });
     } catch {
       res.status(404).json({ message: "Not found" });
       next();
     }
   };
   
-  const updateContact = async (req, res, next) => {
+  const updateFloss = async (req, res, next) => {
     const { error, value } = updateValidate.validate(req.body);
     try {
       if (error || Object.keys(value).length === 0) {
@@ -70,22 +72,22 @@ const {
         res.status(400).json(message);
         return;
       }
-      const contact = await Contact.findByIdAndUpdate(
-        req.params.contactId,
+      const floss = await UserCollection.findByIdAndUpdate(
+        req.params.flossId,
         req.body,
         { new: true }
       );
-      if (contact === null) {
+      if (floss === null) {
         throw new Error("Not found");
       }
-      res.json(contact);
+      res.json(floss);
     } catch (e) {
       res.status(404).json({ message: e.message });
       next(e);
     }
   };
   
-  const updateStatusContact = async (req, res, next) => {
+  const updateStatusFloss = async (req, res, next) => {
     const { error } = updateFavorite.validate(req.body);
     try {
       if (error) {
@@ -93,15 +95,15 @@ const {
         res.status(400).json(message);
         return;
       }
-      const contact = await Contact.findByIdAndUpdate(
-        req.params.contactId,
+      const floss = await UserCollection.findByIdAndUpdate(
+        req.params.flossId,
         { favorite: req.body.favorite },
         { new: true }
       );
-      if (contact === null) {
+      if (floss === null) {
         throw new Error("Not found");
       }
-      res.json(contact);
+      res.json(floss);
     } catch (e) {
       res.status(404).json({ message: e.message });
       next(e);
@@ -110,9 +112,9 @@ const {
   
   module.exports = {
     getAll,
-    getContactById,
-    addNewContact,
-    deleteContact,
-    updateContact,
-    updateStatusContact,
+    getFlossById,
+    addNewFloss,
+    deleteFloss,
+    updateFloss,
+    updateStatusFloss,
   };

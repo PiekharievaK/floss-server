@@ -77,6 +77,7 @@ const login = async (req, res, next) => {
     res.status(200).json({
       token,
       user: {
+        _id: user._id,
         login: user.login,
         email: user.email,
         subscription: user.subscription,
@@ -106,12 +107,13 @@ const current = async (req, res, next) => {
     return;
   }
   console.log(req.user);
-  const { login, email, subscription } = req.user;
+  const { login, email, subscription, _id } = req.user;
   res.status(200).json({
     status: "succes",
     code: 200,
     data: {
       user: {
+        _id: _id,
         login,
         email,
         subscription,
