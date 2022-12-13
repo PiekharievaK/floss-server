@@ -10,6 +10,7 @@ const { User, userValidate } = require("../models/user");
 const { verifyValidate } = require("../models/user");
 const { sendEmail, verificationLetter } = require("../helpers/");
 const {UserCollection} = require("../models/userCollection")
+const appLink = "https://floss-server.onrender.com"
 
 const signup = async (req, res, next) => {
   const { error } = userValidate.validate(req.body);
@@ -46,7 +47,7 @@ const signup = async (req, res, next) => {
         email,
         subscription: user.subscription,
         avatarURL: user.avatarURL,
-        linkToVerify: `http://localhost:3001/users/verify/${verificationToken}`,
+        linkToVerify: `${appLink}/users/verify/${verificationToken}`,
       },
     });
   } catch (e) {
@@ -201,7 +202,7 @@ const resendVerify = async (req, res, next) => {
     await sendEmail(verificationLetter(email, user.verificationToken));
     res.status(200).json({
       message: "Verification mail is send again",
-      linkToVerify: `http://localhost:3000/users/verify/${user.verificationToken}`,
+      linkToVerify: `${appLink}/users/verify/${user.verificationToken}`,
     });
   } catch (e) {
     res.status(400).json({ message: e.message });
