@@ -3,12 +3,11 @@ const Joi = require("joi");
 
 const userCollectionSchema = Schema(
   {
-    _id: { type: Schema.Types.ObjectId },
     email: { type: String },
     owner: {
       type: Schema.Types.ObjectId,
       ref: "user",
-      required: true,
+     require
     },
     flossCollection: [
       {

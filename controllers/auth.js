@@ -10,7 +10,9 @@ const { User, userValidate } = require("../models/user");
 const { verifyValidate } = require("../models/user");
 const { sendEmail, verificationLetter } = require("../helpers/");
 const {UserCollection} = require("../models/userCollection")
+
 const appLink = "https://floss-server.onrender.com"
+// const appLink = "http://localhost:3001"
 
 const signup = async (req, res, next) => {
   const { error } = userValidate.validate(req.body);
@@ -39,6 +41,13 @@ const signup = async (req, res, next) => {
       avatarURL,
       verificationToken,
     });
+      
+    await  UserCollection.create({
+      email,
+      owner: user._id,
+      flossCollection: []},
+    { versionKey: false, timestamps: true }
+    )
 
     await sendEmail(verificationLetter(email, verificationToken));
 
