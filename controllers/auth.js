@@ -9,6 +9,7 @@ const { SECRET_KEY } = process.env;
 const { User, userValidate } = require("../models/user");
 const { verifyValidate } = require("../models/user");
 const { sendEmail, verificationLetter } = require("../helpers/");
+const {UserCollection} = require("../models/userCollection")
 
 const signup = async (req, res, next) => {
   const { error } = userValidate.validate(req.body);
@@ -64,6 +65,8 @@ const login = async (req, res, next) => {
 
     const { email, password } = req.body;
     const user = await User.findOne({ email });
+    const collection = await UserCollection.findOne({owner: user._id})
+    const collectionId = collection._id
 
     if (!user || !user.verify || !bcrypt.compareSync(password, user.password)) {
       throw new Error("Email or password is wrong or email is not verify");
@@ -80,6 +83,7 @@ const login = async (req, res, next) => {
         _id: user._id,
         login: user.login,
         email: user.email,
+        collectionId: collectionId,
         subscription: user.subscription,
       },
     });
@@ -101,19 +105,22 @@ const logout = async (req, res, next) => {
 };
 
 const current = async (req, res, next) => {
-  console.log(req);
+  // console.log(req);
   if (!req.user) {
     res.status(401).json({ message: "Not authorized" });
     return;
   }
-  console.log(req.user);
   const { login, email, subscription, _id } = req.user;
+  const collection = await UserCollection.findOne({owner: _id})
+    const collectionId = collection._id
+  console.log(collection._id);
   res.status(200).json({
     status: "succes",
     code: 200,
     data: {
       user: {
         _id: _id,
+        collectionId,
         login,
         email,
         subscription,

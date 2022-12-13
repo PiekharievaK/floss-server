@@ -2,15 +2,14 @@ const { Schema, model } = require("mongoose");
 const Joi = require("joi");
 
 const flossSchema = Schema(
-  
   {
-    dmcNumber: {
+    number: {
       type: String,
-      required: [true, "Set name for contact"],
+      required: [true, "Set namber for floss"],
     },
     hex: {
-        type: String,
-      },
+      type: String,
+    },
     colorName: {
       type: String,
     },
@@ -21,6 +20,7 @@ const flossSchema = Schema(
     count: {
       type: Number,
       default: false,
+      require,
     },
     owner: {
       type: Schema.Types.ObjectId,
@@ -28,8 +28,8 @@ const flossSchema = Schema(
       required: true,
     },
   }
-//   ,
-//   { versionKey: false, timestamps: true }
+  //   ,
+  //   { versionKey: false, timestamps: true }
 );
 
 const addValidate = Joi.object({
@@ -37,20 +37,19 @@ const addValidate = Joi.object({
   hex: Joi.string().required(),
   colorName: Joi.string(),
   count: Joi.number(),
- });
+});
 
 const updateValidate = Joi.object({
   name: Joi.string().min(3).max(30),
   id: Joi.string(),
   count: Joi.number(),
-
 });
 
 const deleteFavorite = Joi.object({
   id: Joi.string().required(),
 });
 
-const Floss = model("floss", flossSchema);
+const Floss = model("usersfloss", flossSchema);
 
 module.exports = {
   addValidate,

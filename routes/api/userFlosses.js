@@ -4,13 +4,13 @@ const {auth} = require("../../middlewares")
 
 const router = express.Router();
 
-router.post("/", ctrl.userFloses.getAll);
+router.get("/:collectionId", ctrl.userFloses.getAll);
 
 router.get("/:flossId", ctrl.userFloses.getFlossById);
 
 router.post("/", auth, ctrl.userFloses.addNewFloss);
 
-router.put("/:flossId", ctrl.userFloses.updateFloss);
+router.put("/:collectionId", ctrl.userFloses.updateFloss);
 
 router.delete("/:flossId", ctrl.userFloses.deleteFloss);
 

@@ -1,120 +1,168 @@
 const {
-    UserCollection,
-    addValidate,
-    updateValidate,
-    updateFavorite,
-  } = require("../models/userCollection");
-  
-  const getAll = async (req, res, next) => {
-    const id = req.body.user._id
-    try {
-      const flosses = await UserCollection.findOne({owner: id}).populate("owner", "_id, email" );
-      console.log(flosses);
-      
-      res.status(200).json(flosses);
-    } catch (e) {
-      res.status(204).json({ message: "No flosses" });
-      next(e);
+  UserCollection,
+  addValidate,
+  // updateValidate,
+  updateFavorite,
+} = require("../models/userCollection");
+const { DMCFlosses } = require("../models/floss");
+
+const getAll = async (req, res, next) => {
+  const collectionId = req.params.collectionId;
+
+  try {
+    const flosses = await UserCollection.findById(collectionId);
+
+    res.status(200).json(flosses);
+  } catch (e) {
+    res.status(204).json({ message: "No flosses" });
+    next(e);
+  }
+};
+
+const getFlossById = async (req, res, next) => {
+  const flosses = await UserCollection.findById(req.params.flossId);
+  try {
+    if (!flosses) {
+      throw new Error();
     }
-  };
-  
-  const getFlossById = async (req, res, next) => {
-    try {
-      const flosses = await UserCollection.findById(req.params.flossId);
-      if (!flosses) {
-        throw new Error();
-      }
-      res.status(200).json(flosses);
-    } catch (e) {
-      res.status(404).json({ message: "Not found" });
-      next(e);
+    if (req.body.floss.label === "DMC") {
+      const dmc = await DMCFlosses.find({ number: req.body.floss.number });
+      console.log(dmc);
     }
-  };
-  
-  const addNewFloss = async (req, res, next) => {
-    const { error } = addValidate.validate(req.body);
-  
-    try {
-      if (error) {
-        throw new Error(error.message);
-      }
-      const {_id} = req.user;
-      const floss = await UserCollection.create({...req.body, owner: _id} );
-      if (!floss) {
-        throw new Error("Floss with this nunber has already been in your journal");
-      }
-   
-      res.status(201).json({ floss: floss });
-    } catch (e) {
-      res.status(400).json({ message: e.message });
-      next(e);
+    res.status(200).json(flosses);
+  } catch (e) {
+    res.status(404).json({ message: "Not found" });
+    next(e);
+  }
+};
+
+const addNewFloss = async (req, res, next) => {
+  const { error } = addValidate.validate(req.body);
+  const { collectionId, floss } = req.body;
+  const userCollection = await UserCollection.findById(collectionId);
+
+  try {
+    if (error) {
+      throw new Error(error.message);
     }
-  };
-  
-  const deleteFloss = async (req, res, next) => {
-    try {
-      const floss = await UserCollection.findByIdAndDelete(req.params.flossId);
-      if (!floss) {
-        throw new Error();
-      }
-      res.status(200).json({ message: "floss deleted" });
-    } catch {
-      res.status(404).json({ message: "Not found" });
-      next();
+    if (
+      userCollection.flossCollection.find(
+        (item) => item.number === floss.number && item.label === floss.label
+      )
+    ) {
+      throw new Error("already have this floss");
     }
-  };
-  
-  const updateFloss = async (req, res, next) => {
-    const { error, value } = updateValidate.validate(req.body);
-    try {
-      if (error || Object.keys(value).length === 0) {
-        const message = error ? error.message : "missing fields";
-        res.status(400).json(message);
-        return;
+
+    if (floss.label === "DMC") {
+      const dmc = await DMCFlosses.findOne({ number: floss.number });
+      if (!dmc) {
+        throw new Error("no this floss on our collection");
       }
-      const floss = await UserCollection.findByIdAndUpdate(
-        req.params.flossId,
-        req.body,
-        { new: true }
-      );
-      if (floss === null) {
-        throw new Error("Not found");
+      const newFloss = {
+        label: floss.label,
+        number: dmc.number,
+        hex: dmc.hex,
+        colorName: dmc.colorName,
+        colorRUname: dmc.colorRUname,
+        count: floss.count,
+      };
+      await UserCollection.findByIdAndUpdate(collectionId, {
+        flossCollection: [...userCollection.flossCollection, newFloss],
+      });
+      res.status(201).json(dmc);
+    } else {
+      console.log(floss);
+      const cl = await UserCollection.findByIdAndUpdate(collectionId, {
+        flossCollection: [...userCollection.flossCollection, floss],
+      });
+
+      if (!userCollection) {
+        throw new Error("no collection");
       }
-      res.json(floss);
-    } catch (e) {
-      res.status(404).json({ message: e.message });
-      next(e);
+
+      res.status(201).json(cl);
     }
-  };
-  
-  const updateStatusFloss = async (req, res, next) => {
-    const { error } = updateFavorite.validate(req.body);
-    try {
-      if (error) {
-        const message = error ? error.message : "missing field";
-        res.status(400).json(message);
-        return;
-      }
-      const floss = await UserCollection.findByIdAndUpdate(
-        req.params.flossId,
-        { favorite: req.body.favorite },
-        { new: true }
-      );
-      if (floss === null) {
-        throw new Error("Not found");
-      }
-      res.json(floss);
-    } catch (e) {
-      res.status(404).json({ message: e.message });
-      next(e);
+  } catch (e) {
+    res.status(400).json({ message: e.message });
+    next(e);
+  }
+};
+
+const deleteFloss = async (req, res, next) => {
+  try {
+    const floss = await UserCollection.findByIdAndUpdate(req.params.flossId);
+    if (!floss) {
+      throw new Error();
     }
-  };
-  
-  module.exports = {
-    getAll,
-    getFlossById,
-    addNewFloss,
-    deleteFloss,
-    updateFloss,
-    updateStatusFloss,
-  };
+    res.status(200).json({ message: "floss deleted" });
+  } catch {
+    res.status(404).json({ message: "Not found" });
+    next();
+  }
+};
+
+const updateFloss = async (req, res, next) => {
+  // const { error, value } = updateValidate.validate(req.body);
+  const {flossId, method} = req.body
+  const userCollection = await UserCollection.findById(req.params.collectionId)
+
+  try {
+
+    if (method ==="delete"){
+      console.log("delete");
+    const newCollection = userCollection.flossCollection.filter(item => item._id.toString() !== flossId)
+    const floss = await UserCollection.findByIdAndUpdate(
+      req.params.collectionId,
+      {flossCollection: newCollection}
+    );
+    res.status(200).json(`floss ${floss} delete`)
+  }else{
+  const newCollection = userCollection.flossCollection.map(item => {if ( item._id.toString() === flossId ){
+    item.count= req.body.count
+    return item
+  }
+  return item
+  })
+  const floss = await UserCollection.findByIdAndUpdate(
+    req.params.collectionId,
+      {flossCollection: newCollection},
+  )
+
+    res.json(floss);}
+  } catch (e) {
+    res.status(404).json({ message: e.message });
+    next(e);
+  }
+};
+
+const updateStatusFloss = async (req, res, next) => {
+  const { error } = updateFavorite.validate(req.body);
+  try {
+    if (error) {
+      const message = error ? error.message : "missing field";
+      res.status(400).json(message);
+      return;
+    }
+    const floss = await UserCollection.findByIdAndUpdate(
+      req.params.flossId,
+      { favorite: req.body.favorite },
+      { new: true }
+    );
+    if (floss === null) {
+      throw new Error("Not found");
+    }
+    res.json(floss);
+  } catch (e) {
+    res.status(404).json({ message: e.message });
+    next(e);
+  }
+};
+
+module.exports = {
+  getAll,
+  getFlossById,
+  addNewFloss,
+  deleteFloss,
+  updateFloss,
+  updateStatusFloss,
+};
