@@ -10,7 +10,7 @@ const { User, userValidate } = require("../models/user");
 const { verifyValidate } = require("../models/user");
 const { sendEmail, verificationLetter } = require("../helpers/");
 const {UserCollection} = require("../models/userCollection")
-const appLink = "https://floss-piekharievak.vercel.app/"
+const appLink = "https://floss-server.onrender.com"
 
 const signup = async (req, res, next) => {
   const { error } = userValidate.validate(req.body);
