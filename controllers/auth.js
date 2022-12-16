@@ -6,16 +6,20 @@ const Jimp = require("jimp");
 const gravatar = require("gravatar");
 const { v4 } = require("uuid");
 const { SECRET_KEY } = process.env;
-const { User, userValidate } = require("../models/user");
+const {
+  User,
+  userSignUpValidate,
+  userLogInValidate,
+} = require("../models/user");
 const { verifyValidate } = require("../models/user");
 const { sendEmail, verificationLetter } = require("../helpers/");
-const {UserCollection} = require("../models/userCollection")
+const { UserCollection } = require("../models/userCollection");
 
 const appLink = "https://floss-server.onrender.com"
-// const appLink = "http://localhost:3001"
+// const appLink = "http://localhost:3001";
 
 const signup = async (req, res, next) => {
-  const { error } = userValidate.validate(req.body);
+  const { error } = userSignUpValidate.validate(req.body);
 
   try {
     if (error) {
@@ -41,15 +45,17 @@ const signup = async (req, res, next) => {
       avatarURL,
       verificationToken,
     });
-      
-    await  UserCollection.create({
-      email,
-      owner: user._id,
-      flossCollection: []},
-    { versionKey: false, timestamps: true }
-    )
 
-    await sendEmail(verificationLetter(email, verificationToken));
+    await UserCollection.create(
+      {
+        email,
+        owner: user._id,
+        flossCollection: [],
+      },
+      { versionKey: false, timestamps: true }
+    );
+
+    await sendEmail(verificationLetter(email, verificationToken, appLink));
 
     res.status(201).json({
       user: {
@@ -66,7 +72,7 @@ const signup = async (req, res, next) => {
 };
 
 const login = async (req, res, next) => {
-  const { error } = userValidate.validate(req.body);
+  const { error } = userLogInValidate.validate(req.body);
 
   try {
     if (error) {
@@ -75,11 +81,17 @@ const login = async (req, res, next) => {
 
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-    const collection = await UserCollection.findOne({owner: user._id})
-    const collectionId = collection._id
+    const collection = await UserCollection.findOne({ owner: user._id });
+    const collectionId = collection._id;
 
-    if (!user || !user.verify || !bcrypt.compareSync(password, user.password)) {
-      throw new Error("Email or password is wrong or email is not verify");
+    if (!user || !bcrypt.compareSync(password, user.password)) {
+      throw new Error("Email or password is wrong");
+    }
+
+    if (!user.verify) {
+      throw new Error(
+        `email is not verify, use this link to veryfy ${appLink}/users/verify/${user.verificationToken}`
+      );
     }
 
     const token = jwt.sign({ id: user._id }, SECRET_KEY, {
@@ -115,14 +127,13 @@ const logout = async (req, res, next) => {
 };
 
 const current = async (req, res, next) => {
-  // console.log(req);
   if (!req.user) {
     res.status(401).json({ message: "Not authorized" });
     return;
   }
   const { login, email, subscription, _id } = req.user;
-  const collection = await UserCollection.findOne({owner: _id})
-    const collectionId = collection._id
+  const collection = await UserCollection.findOne({ owner: _id });
+  const collectionId = collection._id;
   console.log(collection._id);
   res.status(200).json({
     status: "succes",

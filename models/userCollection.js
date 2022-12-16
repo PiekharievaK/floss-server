@@ -7,7 +7,7 @@ const userCollectionSchema = Schema(
     owner: {
       type: Schema.Types.ObjectId,
       ref: "user",
-     require
+      require,
     },
     flossCollection: [
       {
@@ -15,24 +15,27 @@ const userCollectionSchema = Schema(
           type: String,
           required: [true, "Set namber for floss"],
         },
+        label: {
+          type: String,
+          required: [true, "Set label for floss"],
+        },
         hex: {
           type: String,
+          required: [true, "Select color for floss"],
         },
         colorName: {
           type: String,
+          required: [true, "Set color name for floss"],
         },
         colorRUname: {
           type: String,
-          default: "unknown",
-        },
-        label: {
-          type: String,
-          require,
+          default: "No RU name",
         },
 
         count: {
           type: Number,
-          require,
+          default: false,
+          required: [true, "Set count for floss"],
         },
       },
     ],
@@ -47,22 +50,46 @@ const flossValidate = Joi.object({
   count: Joi.number(),
 });
 
-const addValidate = Joi.object({
-  collectionId: Joi.string(),
+const addDMCValidate = Joi.object({
   floss: {
-    number: Joi.string().min(1).max(30).required(),
-    label: Joi.string(),
-    colorName: Joi.string(),
-    hex: Joi.string(),
-    name: Joi.string(),
-    count: Joi.number().required(),
+    number: Joi.string().min(3).max(30).required().messages({
+      "string.empty": `Floss number cannot be an empty field`,
+      "string.min": `Floss number should have a minimum length of {#limit}`,
+      "any.required": `Floss number is a required field`,
+    }),
+    label: Joi.string().required(),
+    count: Joi.number().required().messages({
+      "any.required": `Floss count cannot be an empty field, it's required`,
+    }),
   },
+  collectionId: Joi.string().required(),
+});
+
+const addOtherValidate = Joi.object({
+  floss: {
+    label: Joi.any().required().messages({
+      "string.empty": `Floss label cannot be an empty field`,
+      "string.invalid": `Floss label can't be "DMC", it have reserved number you can add in like "DMC" just in that field. Else you can add it like "Dmc" "dmc" if our collection haven't this number`,
+      "any.required": `Floss label is a required field`,
+    }),
+    colorName: Joi.string().required(),
+    hex: Joi.string().required().messages({
+      "any.required": `Please choose the color of your floss`,
+    }),
+    number: Joi.string().max(30).required().messages({
+      "any.required": `Floss number cannot be an empty field, it's required`,
+    }),
+    count: Joi.number().required().messages({
+      "any.required": `Floss count cannot be an empty field, it's required`,
+    }),
+  },
+  collectionId: Joi.string().required(),
 });
 
 const updateValidate = Joi.object({
-  name: Joi.string().min(3).max(30),
-  id: Joi.string(),
-  count: Joi.number(),
+  count: Joi.number().required(),
+  flossId: Joi.string().required(),
+  method: Joi.string().required(),
 });
 
 const updateFavorite = Joi.object({
@@ -73,7 +100,8 @@ const UserCollection = model("usersfloss", userCollectionSchema);
 
 module.exports = {
   flossValidate,
-  addValidate,
+  addDMCValidate,
+  addOtherValidate,
   updateValidate,
   updateFavorite,
   UserCollection,

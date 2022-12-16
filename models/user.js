@@ -2,9 +2,9 @@ const { Schema, model } = require("mongoose");
 const Joi = require("joi");
 
 const userSchema = Schema({
-  login:{
+  login: {
     type: String,
-    // required: [true, "Login is required"],
+    required: [true, "Login is required"],
   },
   password: {
     type: String,
@@ -38,8 +38,12 @@ const userSchema = Schema({
   },
 });
 
-const userValidate = Joi.object({
-  login: Joi.string(),
+const userSignUpValidate = Joi.object({
+  login: Joi.string().required(),
+  email: Joi.string().email().required(),
+  password: Joi.string().min(3).max(30).required(),
+});
+const userLogInValidate = Joi.object({
   email: Joi.string().required(),
   password: Joi.string().min(3).max(30).required(),
 });
@@ -52,6 +56,7 @@ const User = model("user", userSchema);
 
 module.exports = {
   User,
-  userValidate,
+  userSignUpValidate,
+  userLogInValidate,
   verifyValidate,
 };

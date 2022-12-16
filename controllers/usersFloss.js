@@ -1,7 +1,8 @@
 const {
   UserCollection,
-  addValidate,
-  // updateValidate,
+  addDMCValidate,
+  addOtherValidate,
+  updateValidate,
   updateFavorite,
 } = require("../models/userCollection");
 const { DMCFlosses } = require("../models/floss");
@@ -37,26 +38,43 @@ const getFlossById = async (req, res, next) => {
 };
 
 const addNewFloss = async (req, res, next) => {
-  const { error } = addValidate.validate(req.body);
   const { collectionId, floss } = req.body;
+
   const userCollection = await UserCollection.findById(collectionId);
 
   try {
-    if (error) {
-      throw new Error(error.message);
+    if (floss.label === "DMC") {
+      const { error } = addDMCValidate.validate(req.body);
+      if (error) {
+        console.log(error);
+        console.log(error.details[0].message);
+        throw new Error(`${error.details[0].message}`);
+      }
     }
+    if (floss.label !== "DMC") {
+      const { error } = addOtherValidate.validate(req.body);
+      console.log(error);
+      if (error) {
+        throw new Error(`${error.details[0].message}`);
+      }
+    }
+
     if (
       userCollection.flossCollection.find(
         (item) => item.number === floss.number && item.label === floss.label
       )
     ) {
-      throw new Error("already have this floss");
+      throw new Error(
+        "You already have this floss. Please find it in your collection and update count"
+      );
     }
 
     if (floss.label === "DMC") {
       const dmc = await DMCFlosses.findOne({ number: floss.number });
       if (!dmc) {
-        throw new Error("no this floss on our collection");
+        throw new Error(
+          "no this floss on our collection, pleade add it like `Other`, uou can use 'Dmc' label"
+        );
       }
       const newFloss = {
         label: floss.label,
@@ -102,33 +120,40 @@ const deleteFloss = async (req, res, next) => {
 };
 
 const updateFloss = async (req, res, next) => {
-  // const { error, value } = updateValidate.validate(req.body);
-  const {flossId, method} = req.body
-  const userCollection = await UserCollection.findById(req.params.collectionId)
+  const { flossId, method } = req.body;
+  const userCollection = await UserCollection.findById(req.params.collectionId);
 
   try {
-
-    if (method ==="delete"){
+    if (method === "delete") {
       console.log("delete");
-    const newCollection = userCollection.flossCollection.filter(item => item._id.toString() !== flossId)
-    const floss = await UserCollection.findByIdAndUpdate(
-      req.params.collectionId,
-      {flossCollection: newCollection}
-    );
-    res.status(200).json(`floss ${floss} delete`)
-  }else{
-  const newCollection = userCollection.flossCollection.map(item => {if ( item._id.toString() === flossId ){
-    item.count= req.body.count
-    return item
-  }
-  return item
-  })
-  const floss = await UserCollection.findByIdAndUpdate(
-    req.params.collectionId,
-      {flossCollection: newCollection},
-  )
+      const newCollection = userCollection.flossCollection.filter(
+        (item) => item._id.toString() !== flossId
+      );
+      const floss = await UserCollection.findByIdAndUpdate(
+        req.params.collectionId,
+        { flossCollection: newCollection }
+      );
+      res.status(200).json(`floss ${floss} delete`);
+    } else {
+      const { error } = updateValidate.validate(req.body);
+      if (error) {
+        throw new Error(`${error.details[0].message}`);
+      }
 
-    res.json(floss);}
+      const newCollection = userCollection.flossCollection.map((item) => {
+        if (item._id.toString() === flossId) {
+          item.count = req.body.count;
+          return item;
+        }
+        return item;
+      });
+      const floss = await UserCollection.findByIdAndUpdate(
+        req.params.collectionId,
+        { flossCollection: newCollection }
+      );
+
+      res.json(floss);
+    }
   } catch (e) {
     res.status(404).json({ message: e.message });
     next(e);
