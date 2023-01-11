@@ -5,6 +5,7 @@ require("dotenv").config();
 const authRouter = require("./routes/api/auth");
 const flossRouter = require("./routes/api/floss");
 const userFlossesRouter = require("./routes/api/userFlosses");
+const userSchemasRouter = require("./routes/api/userSchemas");
 const app = express();
 
 const formatsLogger = app.get("env") === "development" ? "dev" : "short";
@@ -15,7 +16,9 @@ app.use(express.json());
 app.use(express.static("public"));
 app.use("/DMCflossCollection", flossRouter);
 app.use("/users", authRouter);
-app.use("/journal", userFlossesRouter);
+app.use("/flosses", userFlossesRouter);
+app.use("/schemas",  userSchemasRouter);
+
 
 
 app.get("/", (req, res) => {

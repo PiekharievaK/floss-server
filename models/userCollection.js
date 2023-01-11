@@ -39,9 +39,30 @@ const userCollectionSchema = Schema(
         },
       },
     ],
+    schemaCollection: [
+      {
+        name: {
+          type: String,
+          required: [true, "Set name for schema"],
+        },
+        image: {
+          urlPreview: { type: String },
+          urlFull: { type: String },
+          deleteUrl: { type: String },
+        },
+        schemasList: [
+          {
+            label: { type: String },
+            flosses: [{ number: { type: String }, count: { type: Number } }],
+          },
+        ],
+      },
+    ],
   },
   { versionKey: false, timestamps: true }
 );
+
+// Floss validation
 
 const flossValidate = Joi.object({
   dmcNumber: Joi.string().min(3).max(30).required(),
@@ -92,17 +113,44 @@ const updateValidate = Joi.object({
   method: Joi.string().required(),
 });
 
-const updateFavorite = Joi.object({
-  favorite: Joi.bool().required(),
+
+// const updateFavorite = Joi.object({
+//   favorite: Joi.bool().required(),
+// });
+
+
+// Schemas validation
+
+const addSchemaValidate = Joi.object({
+  schema: {name: Joi.string().required()},
+  collectionId: Joi.string().required(),
+
 });
 
-const UserCollection = model("usersfloss", userCollectionSchema);
+const addSchemaFlossesValidate = Joi.object({
+  number: Joi.string().max(30).required().messages({
+    "any.required": `Floss number cannot be an empty field, it's required`,
+  }),
+  count: Joi.number().required().messages({
+    "any.required": `Floss count cannot be an empty field, it's required`,
+  }),
+})
+
+const addSchemaImageValidate = Joi.object({
+  image: Joi.binary().required().messages({
+    "any.required": `You should pick the image to save, it's required`,
+  })})
+
+const UserCollection = model("userscollection", userCollectionSchema);
 
 module.exports = {
+  // updateFavorite,
+  UserCollection,
   flossValidate,
   addDMCValidate,
   addOtherValidate,
   updateValidate,
-  updateFavorite,
-  UserCollection,
+  addSchemaValidate,
+  addSchemaFlossesValidate,
+  addSchemaImageValidate,
 };

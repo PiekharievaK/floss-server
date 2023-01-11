@@ -11,9 +11,9 @@ const getAll = async (req, res, next) => {
   const collectionId = req.params.collectionId;
 
   try {
-    const flosses = await UserCollection.findById(collectionId);
+    const collection = await UserCollection.findById(collectionId);
 
-    res.status(200).json(flosses);
+    res.status(200).json(collection.flossCollection);
   } catch (e) {
     res.status(204).json({ message: "No flosses" });
     next(e);
@@ -21,16 +21,16 @@ const getAll = async (req, res, next) => {
 };
 
 const getFlossById = async (req, res, next) => {
-  const flosses = await UserCollection.findById(req.params.flossId);
+  const collection = await UserCollection.findById(req.params.flossId);
   try {
-    if (!flosses) {
+    if (!collection) {
       throw new Error();
     }
     if (req.body.floss.label === "DMC") {
       const dmc = await DMCFlosses.find({ number: req.body.floss.number });
       console.log(dmc);
     }
-    res.status(200).json(flosses);
+    res.status(200).json(collection);
   } catch (e) {
     res.status(404).json({ message: "Not found" });
     next(e);
@@ -61,7 +61,7 @@ const addNewFloss = async (req, res, next) => {
 
     if (
       userCollection.flossCollection.find(
-        (item) => item.number === floss.number && item.label === floss.label
+        (item) => item.number === floss.number && item.label.toLowerCase() === floss.label.toLowerCase()
       )
     ) {
       throw new Error(
@@ -126,6 +126,7 @@ const updateFloss = async (req, res, next) => {
   try {
     if (method === "delete") {
       console.log("delete");
+      // попробовать тут userCollection.flossCollection.findByIdAndDelete(flossId)
       const newCollection = userCollection.flossCollection.filter(
         (item) => item._id.toString() !== flossId
       );
@@ -140,6 +141,7 @@ const updateFloss = async (req, res, next) => {
         throw new Error(`${error.details[0].message}`);
       }
 
+       // попробовать тут userCollection.flossCollection.findByIdAndUpdate(flossId, count: req.body.count )
       const newCollection = userCollection.flossCollection.map((item) => {
         if (item._id.toString() === flossId) {
           item.count = req.body.count;
