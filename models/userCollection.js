@@ -50,7 +50,7 @@ const userCollectionSchema = Schema(
           urlFull: { type: String },
           deleteUrl: { type: String },
         },
-        schemasList: [
+        flossesList: [
           {
             label: { type: String },
             flosses: [{ number: { type: String }, count: { type: Number } }],

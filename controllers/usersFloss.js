@@ -126,7 +126,7 @@ const updateFloss = async (req, res, next) => {
   try {
     if (method === "delete") {
       console.log("delete");
-      // попробовать тут userCollection.flossCollection.findByIdAndDelete(flossId)
+
       const newCollection = userCollection.flossCollection.filter(
         (item) => item._id.toString() !== flossId
       );
@@ -141,7 +141,7 @@ const updateFloss = async (req, res, next) => {
         throw new Error(`${error.details[0].message}`);
       }
 
-       // попробовать тут userCollection.flossCollection.findByIdAndUpdate(flossId, count: req.body.count )
+
       const newCollection = userCollection.flossCollection.map((item) => {
         if (item._id.toString() === flossId) {
           item.count = req.body.count;

@@ -12,6 +12,7 @@ router.get("/:collectionId", ctrl.userSchemas.getAll);
 
 router.post("/", auth, ctrl.userSchemas.addNewSchema);
 router.post("/image", upload.single("image"), ctrl.userSchemas.addImage);
+router.post("/floss",  ctrl.userSchemas.addFloss);
 
 // router.put("/:collectionId", ctrl.userSchemas.updateFloss);
 

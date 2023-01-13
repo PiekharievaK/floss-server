@@ -63,6 +63,46 @@ const addImage = async (req, res, next) => {
   }
 };
 
+
+const addFloss = async(req, res, next)=>{
+  const { collectionid, schemaid } = req.headers;
+  const addedFloss = req.body
+  // console.log(addedFloss);
+  try {
+    const collection = await UserCollection.findById(collectionid);
+    const newCollection = collection.schemaCollection.map((schema) => {
+      if (schema._id.toString() !== schemaid) {
+        return schema;
+      } 
+      // console.log(schema, schema.flossesList);
+      if(schema.flossesList.length<1){
+        schema.flossesList.push({label: addedFloss.label, flosses:[{number: addedFloss.number, count: addedFloss.count}] })
+      }
+      else{
+        const flossLabel = schema.flossesList.find(flosses=> flosses.label === addedFloss.label)
+        console.log(flossLabel);
+        if(flossLabel){
+      flossLabel.flosses.push({number: addedFloss.number, count: addedFloss.count})}
+      else{
+        schema.flossesList.push({label: addedFloss.label, flosses:[{number: addedFloss.number, count: addedFloss.count}] })
+      }
+       
+      }
+      return schema;
+    });
+
+    await UserCollection.findByIdAndUpdate(collectionid, {
+      schemaCollection: newCollection,
+    });
+
+    res.status(200).json(collection.schemaCollection);
+  } catch (e) {
+    console.log(e);
+    res.status(204).json({ message: "No schemas" });
+    next(e);
+  }
+  
+}
 // const getSchemaById = async (req, res, next) => {
 //   const flosses = await UserCollection.findById(req.params.flossId);
 //   try {
@@ -208,4 +248,5 @@ module.exports = {
   getAll,
   addNewSchema,
   addImage,
+  addFloss,
 };
