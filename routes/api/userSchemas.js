@@ -13,6 +13,8 @@ router.get("/:collectionId", ctrl.userSchemas.getAll);
 router.post("/", auth, ctrl.userSchemas.addNewSchema);
 router.post("/image", upload.single("image"), ctrl.userSchemas.addImage);
 router.post("/floss",  ctrl.userSchemas.addFloss);
+router.put("/deleteFloss",  ctrl.userSchemas.deleteFloss);
+router.delete("/",  ctrl.userSchemas.deleteSchema)
 
 // router.put("/:collectionId", ctrl.userSchemas.updateFloss);
 
