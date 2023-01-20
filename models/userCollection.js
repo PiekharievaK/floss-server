@@ -71,7 +71,7 @@ const flossValidate = Joi.object({
   count: Joi.number(),
 });
 
-const addDMCValidate = Joi.object({
+const addLabelValidate = Joi.object({
   floss: {
     number: Joi.string().min(3).max(30).required().messages({
       "string.empty": `Floss number cannot be an empty field`,
@@ -147,7 +147,7 @@ module.exports = {
   // updateFavorite,
   UserCollection,
   flossValidate,
-  addDMCValidate,
+  addLabelValidate,
   addOtherValidate,
   updateValidate,
   addSchemaValidate,

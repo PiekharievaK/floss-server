@@ -1,7 +1,7 @@
 const { Schema, model } = require("mongoose");
 
 const flossSchema = Schema({
-  number: {
+  dmcNumber: {
     type: String,
     required: [true, "Set name for contact"],
   },
@@ -14,10 +14,35 @@ const flossSchema = Schema({
   colorRUname: {
     type: String,
   },
+  labels: {
+   
+DMC: {
+    type: String,
+  },
+BELKA: {
+    type: String,
+  },
+Kirova: {
+    type: String,
+  },
+Bestex: {
+    type: String,
+  },
+Gamma: {
+    type: String,
+  },
+Anchor: {
+    type: String,
+  },
+Madeira: {
+    type: String,
+  },
+  }
 });
 
-const DMCFlosses = model("dmcfloss", flossSchema);
+// const DMCFlosses = model("dmcfloss", flossSchema);
+const DataFlosses = model("flossesdata", flossSchema);
 
 module.exports = {
-  DMCFlosses,
+  DataFlosses,
 };
