@@ -1,8 +1,8 @@
-const { DMCFlosses } = require("../models/floss");
+const { DataFlosses } = require("../models/floss");
 
 const getFlossCollection = async (req, res, next) => {
   try {
-    const collection = await DMCFlosses.find({});
+    const collection = await DataFlosses.find({});
 
     res.status(200).json(collection);
   } catch (e) {
