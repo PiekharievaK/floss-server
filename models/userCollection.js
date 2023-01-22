@@ -65,15 +65,15 @@ const userCollectionSchema = Schema(
 // Floss validation
 
 const flossValidate = Joi.object({
-  dmcNumber: Joi.string().min(3).max(30).required(),
+  dmcNumber: Joi.string().min(1).max(30).required(),
   hex: Joi.string().required(),
   colorName: Joi.string(),
   count: Joi.number(),
 });
 
-const addDMCValidate = Joi.object({
+const addLabelValidate = Joi.object({
   floss: {
-    number: Joi.string().min(3).max(30).required().messages({
+    number: Joi.string().min(1).max(30).required().messages({
       "string.empty": `Floss number cannot be an empty field`,
       "string.min": `Floss number should have a minimum length of {#limit}`,
       "any.required": `Floss number is a required field`,
@@ -103,6 +103,7 @@ const addOtherValidate = Joi.object({
     count: Joi.number().required().messages({
       "any.required": `Floss count cannot be an empty field, it's required`,
     }),
+    customLabel: Joi.boolean().required(),
   },
   collectionId: Joi.string().required(),
 });
@@ -147,7 +148,7 @@ module.exports = {
   // updateFavorite,
   UserCollection,
   flossValidate,
-  addDMCValidate,
+  addLabelValidate,
   addOtherValidate,
   updateValidate,
   addSchemaValidate,
