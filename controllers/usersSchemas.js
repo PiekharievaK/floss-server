@@ -5,16 +5,52 @@ const {
   UserCollection,
   addSchemaValidate,
 } = require("../models/userCollection");
+// const { number } = require("joi");
 
 // const { DMCFlosses } = require("../models/floss");
+
+const checkFlossAvailability = (userSchemaCollection, userFlossCollection) => {
+  const checkedSchemas = userSchemaCollection.map(schema => {
+    if(schema.flossesList<1){return schema}
+    const updatedFlossesList = schema.flossesList.map(labeledFlosses => {
+      const availabeFlosses = labeledFlosses.flosses.map(floss => {
+        const userFloss = userFlossCollection.find(
+          (item) =>
+            labeledFlosses.label === item.label && floss.number === item.number
+        );
+        if (!userFloss) {
+         return ({ _id: floss._id, number: floss.number, count: floss.count, availabel: false,  missingQuantity: floss.count});
+        } 
+        const checkedFloss = {
+          _id: floss._id,
+          number: floss.number, count: floss.count,
+          availabel: (Number(floss.count) <= Number(userFloss.count)),
+          missingQuantity: (Math.abs(
+            Number(floss.count) - Number(userFloss.count)
+          )),
+        };
+        return checkedFloss;
+      });
+      return {_id: labeledFlosses._id, label: labeledFlosses.label, flosses:availabeFlosses};
+    });
+
+    return { _id: schema._id, name: schema.name, image: schema.image, flossesList: updatedFlossesList};
+  });
+  return checkedSchemas;
+};
 
 const getAll = async (req, res, next) => {
   const collectionId = req.params.collectionId;
 
   try {
     const collection = await UserCollection.findById(collectionId);
-    res.status(200).json(collection.schemaCollection);
+    const checkedSchemas = checkFlossAvailability(
+      collection.schemaCollection,
+      collection.flossCollection
+    );
+    res.status(200).json(checkedSchemas);
   } catch (e) {
+    console.log(e.message);
     res.status(204).json({ message: "No schemas" });
     next(e);
   }
@@ -32,7 +68,7 @@ const addImage = async (req, res, next) => {
 
     const { data } = await axios.post(imgbbUrl, formData);
     console.log(data);
- 
+
     try {
       const collection = await UserCollection.findById(collectionid);
       const newCollection = collection.schemaCollection.map((schema) => {
@@ -41,7 +77,9 @@ const addImage = async (req, res, next) => {
         }
 
         schema.image = {
-          urlPreview: data.data.medium?.url? data.data.medium.url: data.data.display_url,
+          urlPreview: data.data.medium?.url
+            ? data.data.medium.url
+            : data.data.display_url,
           urlFull: data.data.image.url,
           deleteUrl: data.data.delete_url,
         };
@@ -62,27 +100,35 @@ const addImage = async (req, res, next) => {
   }
 };
 
-
-const addFloss = async(req, res, next)=>{
+const addFloss = async (req, res, next) => {
   const { collectionid, schemaid } = req.headers;
-  const addedFloss = req.body
+  const addedFloss = req.body;
   try {
     const collection = await UserCollection.findById(collectionid);
     const newCollection = collection.schemaCollection.map((schema) => {
       if (schema._id.toString() !== schemaid) {
         return schema;
-      } 
-      if(schema.flossesList.length<1){
-        schema.flossesList.push({label: addedFloss.label, flosses:[{number: addedFloss.number, count: addedFloss.count}] })
       }
-      else{
-        const flossLabel = schema.flossesList.find(flosses=> flosses.label === addedFloss.label)
-        if(flossLabel){
-      flossLabel.flosses.push({number: addedFloss.number, count: addedFloss.count})}
-      else{
-        schema.flossesList.push({label: addedFloss.label, flosses:[{number: addedFloss.number, count: addedFloss.count}] })
-      }
-       
+      if (schema.flossesList.length < 1) {
+        schema.flossesList.push({
+          label: addedFloss.label,
+          flosses: [{ number: addedFloss.number, count: addedFloss.count }],
+        });
+      } else {
+        const flossLabel = schema.flossesList.find(
+          (flosses) => flosses.label === addedFloss.label
+        );
+        if (flossLabel) {
+          flossLabel.flosses.push({
+            number: addedFloss.number,
+            count: addedFloss.count,
+          });
+        } else {
+          schema.flossesList.push({
+            label: addedFloss.label,
+            flosses: [{ number: addedFloss.number, count: addedFloss.count }],
+          });
+        }
       }
       return schema;
     });
@@ -97,49 +143,49 @@ const addFloss = async(req, res, next)=>{
     res.status(204).json({ message: "No schemas" });
     next(e);
   }
-  
-}
+};
 
-const deleteFloss = async (req, res, next) =>{
-  const { collectionid , schemaid } = req.headers;
+const deleteFloss = async (req, res, next) => {
+  const { collectionid, schemaid } = req.headers;
 
-  const { label, flossId }= req.body
+  const { label, flossId } = req.body;
   // console.log(collectionid, schemaid, label, flossId);
   try {
     const collection = await UserCollection.findById(collectionid);
     const newCollection = await collection.schemaCollection.map((schema) => {
       if (schema._id.toString() !== schemaid) {
         return schema;
-      }      
-      const newSchema = schema
-        const flossLabel = newSchema.flossesList.find(flosses=> flosses.label === label)
-        // console.log(flossLabel.flosses, flossId);
-        if(flossLabel){
-       
-      flossLabel.flosses = flossLabel.flosses.filter(floss => floss._id.toString() !== flossId)
-      if(flossLabel.flosses.length <1 ){
-        newSchema.flossesList = newSchema.flossesList.filter(flosses => flosses.label !== label)
-        return newSchema
       }
-      return schema;
-    }else {
-      throw new Error("no floss by this lable")
-    }
-    
-      })
-      await UserCollection.findByIdAndUpdate(collectionid, {
-        schemaCollection: newCollection,
-      });
-      res.status(200).json(collection.schemaCollection);
-    
+      const newSchema = schema;
+      const flossLabel = newSchema.flossesList.find(
+        (flosses) => flosses.label === label
+      );
+      // console.log(flossLabel.flosses, flossId);
+      if (flossLabel) {
+        flossLabel.flosses = flossLabel.flosses.filter(
+          (floss) => floss._id.toString() !== flossId
+        );
+        if (flossLabel.flosses.length < 1) {
+          newSchema.flossesList = newSchema.flossesList.filter(
+            (flosses) => flosses.label !== label
+          );
+          return newSchema;
+        }
+        return schema;
+      } else {
+        throw new Error("no floss by this lable");
+      }
+    });
+    await UserCollection.findByIdAndUpdate(collectionid, {
+      schemaCollection: newCollection,
+    });
+    res.status(200).json(collection.schemaCollection);
   } catch (e) {
     console.log(e);
-    res.status(204).json({ message: e.message});
+    res.status(204).json({ message: e.message });
     next(e);
   }
-
-}
-
+};
 
 const addNewSchema = async (req, res, next) => {
   const { collectionId, schema } = req.body;
@@ -185,24 +231,26 @@ const addNewSchema = async (req, res, next) => {
   }
 };
 
-const deleteSchema = async(req, res, next) =>{
-  const { collectionid , schemaid } = req.headers;
+const deleteSchema = async (req, res, next) => {
+  const { collectionid, schemaid } = req.headers;
   console.log(collectionid, schemaid);
   try {
-    const collection = await UserCollection.findByIdAndUpdate(collectionid );
+    const collection = await UserCollection.findByIdAndUpdate(collectionid);
     console.log(collection);
-    const newCollection = await collection.schemaCollection.filter(schema =>
-      schema._id.toString() !== schemaid 
-        )
-        console.log(newCollection.schemaCollection);
-        await UserCollection.findByIdAndUpdate(collectionid, {schemaCollection: newCollection})
-        res.status(200).json("Sucsesfully delete")
+    const newCollection = await collection.schemaCollection.filter(
+      (schema) => schema._id.toString() !== schemaid
+    );
+    console.log(newCollection.schemaCollection);
+    await UserCollection.findByIdAndUpdate(collectionid, {
+      schemaCollection: newCollection,
+    });
+    res.status(200).json("Sucsesfully delete");
   } catch (e) {
-      console.log(e);
-      res.status(400).json({ message: e.message });
-      next(e);
-    } 
-}
+    console.log(e);
+    res.status(400).json({ message: e.message });
+    next(e);
+  }
+};
 
 module.exports = {
   getAll,
@@ -210,5 +258,5 @@ module.exports = {
   addImage,
   addFloss,
   deleteFloss,
-  deleteSchema
+  deleteSchema,
 };
