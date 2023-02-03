@@ -6,6 +6,7 @@ const authRouter = require("./routes/api/auth");
 const flossRouter = require("./routes/api/floss");
 const userFlossesRouter = require("./routes/api/userFlosses");
 const userSchemasRouter = require("./routes/api/userSchemas");
+const userWishListRouter = require("./routes/api/userWishList")
 const app = express();
 
 const formatsLogger = app.get("env") === "development" ? "dev" : "short";
@@ -18,6 +19,8 @@ app.use("/DMCflossCollection", flossRouter);
 app.use("/users", authRouter);
 app.use("/flosses", userFlossesRouter);
 app.use("/schemas",  userSchemasRouter);
+app.use("/wishList",  userWishListRouter);
+
 
 
 

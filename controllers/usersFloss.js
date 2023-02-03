@@ -30,7 +30,7 @@ const getFlossById = async (req, res, next) => {
     }
     if (req.body.floss.label !== "DMC") {
       const dmc = await DataFlosses.find({ number: req.body.floss.number });
-      console.log(dmc);
+      // console.log(dmc);
     }
     res.status(200).json(collection);
   } catch (e) {
@@ -79,7 +79,7 @@ const addNewFloss = async (req, res, next) => {
       const labelFloss = allFlosses.find(
         (item) => item.labels[floss.label] === floss.number
       );
-      console.log(labelFloss);
+      // console.log(labelFloss);
 
       if (!labelFloss) {
         throw new Error(

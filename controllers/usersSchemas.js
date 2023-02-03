@@ -10,31 +10,50 @@ const {
 // const { DMCFlosses } = require("../models/floss");
 
 const checkFlossAvailability = (userSchemaCollection, userFlossCollection) => {
-  const checkedSchemas = userSchemaCollection.map(schema => {
-    if(schema.flossesList<1){return schema}
-    const updatedFlossesList = schema.flossesList.map(labeledFlosses => {
-      const availabeFlosses = labeledFlosses.flosses.map(floss => {
+  const checkedSchemas = userSchemaCollection.map((schema) => {
+    if (schema.flossesList < 1) {
+      return schema;
+    }
+    const updatedFlossesList = schema.flossesList.map((labeledFlosses) => {
+      const availabeFlosses = labeledFlosses.flosses.map((floss) => {
         const userFloss = userFlossCollection.find(
           (item) =>
-            labeledFlosses.label === item.label && floss.number === item.number
+            labeledFlosses.label.toLowerCase() === item.label.toLowerCase() &&
+            floss.number === item.number
         );
         if (!userFloss) {
-         return ({ _id: floss._id, number: floss.number, count: floss.count, availabel: false,  missingQuantity: floss.count});
-        } 
+          return {
+            _id: floss._id,
+            number: floss.number,
+            count: floss.count,
+            availabel: false,
+            missingQuantity: floss.count,
+          };
+        }
         const checkedFloss = {
           _id: floss._id,
-          number: floss.number, count: floss.count,
-          availabel: (Number(floss.count) <= Number(userFloss.count)),
-          missingQuantity: (Math.abs(
+          number: floss.number,
+          count: floss.count,
+          availabel: Number(floss.count) <= Number(userFloss.count),
+          missingQuantity: Math.abs(
             Number(floss.count) - Number(userFloss.count)
-          )),
+          ),
         };
         return checkedFloss;
       });
-      return {_id: labeledFlosses._id, label: labeledFlosses.label, flosses:availabeFlosses};
+      return {
+        _id: labeledFlosses._id,
+        label: labeledFlosses.label,
+        flosses: availabeFlosses,
+      };
     });
 
-    return { _id: schema._id, name: schema.name, image: schema.image, flossesList: updatedFlossesList};
+    return {
+      _id: schema._id,
+      name: schema.name,
+      image: schema.image,
+      flossesList: updatedFlossesList,
+    };
   });
   return checkedSchemas;
 };
@@ -67,7 +86,7 @@ const addImage = async (req, res, next) => {
     formData.append("name", image.name);
 
     const { data } = await axios.post(imgbbUrl, formData);
-    console.log(data);
+    // console.log(data);
 
     try {
       const collection = await UserCollection.findById(collectionid);
@@ -91,7 +110,7 @@ const addImage = async (req, res, next) => {
 
       res.status(200).json(collection.schemaCollection[schemaid]);
     } catch (e) {
-      console.log(e);
+      console.log(e.message);
       res.status(204).json({ message: "No schemas" });
       next(e);
     }
@@ -233,14 +252,14 @@ const addNewSchema = async (req, res, next) => {
 
 const deleteSchema = async (req, res, next) => {
   const { collectionid, schemaid } = req.headers;
-  console.log(collectionid, schemaid);
+  // console.log(collectionid, schemaid);
   try {
     const collection = await UserCollection.findByIdAndUpdate(collectionid);
-    console.log(collection);
+    // console.log(collection);
     const newCollection = await collection.schemaCollection.filter(
       (schema) => schema._id.toString() !== schemaid
     );
-    console.log(newCollection.schemaCollection);
+    // console.log(newCollection.schemaCollection);
     await UserCollection.findByIdAndUpdate(collectionid, {
       schemaCollection: newCollection,
     });

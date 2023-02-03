@@ -52,6 +52,7 @@ const signup = async (req, res, next) => {
         owner: user._id,
         flossCollection: [],
         schemaCollection: [],
+        wishList:[],
       },
       { versionKey: false, timestamps: true }
     );
@@ -135,7 +136,7 @@ const current = async (req, res, next) => {
   const { login, email, subscription, _id } = req.user;
   const collection = await UserCollection.findOne({ owner: _id });
   const collectionId = collection._id;
-  console.log(collection._id);
+  // console.log(collection._id);
   res.status(200).json({
     status: "succes",
     code: 200,

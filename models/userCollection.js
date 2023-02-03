@@ -58,6 +58,23 @@ const userCollectionSchema = Schema(
         ],
       },
     ],
+    wishList:[
+      {
+        label: {
+          type: String,
+          required: [true, "Set label for floss"],
+        },
+        number: {
+          type: String,
+          required: [true, "Set namber for floss"],
+        },
+        count: {
+          type: Number,
+          default: false,
+          required: [true, "Set count for floss"],
+        },
+      },
+    ]
   },
   { versionKey: false, timestamps: true }
 );

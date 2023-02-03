@@ -7,10 +7,10 @@ const sendEmail = async (data) => {
   const email = { ...data, from: "eclipse_133@mail.ru" };
   try {
     await sgMail.send(email);
-    console.log("send is success");
+    // console.log("send is success");
     return true;
   } catch (e) {
-    console.log(e.message, "ddd");
+    console.log(e.message);
     throw e;
   }
 };
