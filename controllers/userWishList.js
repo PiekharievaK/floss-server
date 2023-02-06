@@ -1,4 +1,5 @@
-const { UserCollection } = require("../models/userCollection");
+const { UserCollection, addWishListValidate } = require("../models/userCollection");
+
 
 const getAll = async (req, res, next) => {
   try {
@@ -13,38 +14,73 @@ const getAll = async (req, res, next) => {
 
 const addOne = async (req, res, next) => {
   const floss = req.body;
+  const { error } = addWishListValidate.validate(floss);
+  if (error) {
+    // console.log(error);
+    // console.log(error.details[0].message);
+    throw new Error(`${error.details[0].message}`);
+  }
+  
   try {
     const collection = await UserCollection.findById(req.headers.collectionid);
-    // console.log(collection);
+    if (
+      collection.wishList.find(
+        (item) =>
+          item.number.toLowerCase() === floss.number.toLowerCase() &&
+          item.label.toLowerCase() === floss.label.toLowerCase()
+      )
+    ) {
+      throw new Error(
+        "You already have this floss. Please find it in your wish list and update count"
+      )
+    }
     const newWishList = [...collection.wishList, floss];
-    console.log(newWishList);
-    console.log(floss, req.headers.collectionid);
+    // console.log(newWishList);
+    // console.log(floss, req.headers.collectionid);
     await UserCollection.findByIdAndUpdate(req.headers.collectionid, {
       wishList: newWishList,
     });
 
     res.status(200).json(collection.wishList);
   } catch (e) {
-    res.status(204).json({ message: "No wishes" });
-    next(e);
+    console.log(e.message);
+    res.status(400).json({message: e.message});
+    // next(e);
   }
 };
+
+
 const addFromSchema = async (req, res, next) => {
   const flossList = req.body;
-  console.log(flossList);
+  // console.log(flossList);
   try {
     const collection = await UserCollection.findById(req.headers.collectionid);
     // console.log(collection);
-    const newWishList = [...collection.wishList, ...flossList];
-    console.log(newWishList);
-    console.log(flossList, req.headers.collectionid);
+
+const apdatedFlosses = flossList.map(item=>{ const floss = collection.wishList.find(floss => item.number.toLowerCase() === floss.number.toLowerCase() &&
+  item.label.toLowerCase() === floss.label.toLowerCase())
+  if (floss){
+    // console.log("1", {number: floss.number, label: floss.label, _id: floss._id, count: Number(item.count)+ Number(floss.count)})
+return {number: item.number, label: item.label, _id: floss._id, count: (Number(item.count)+ Number(floss.count))}
+  } 
+  //  console.log("2",{number: item.number, label: item.label, count:item.count}); 
+   return {number: item.number, label: item.label, count:item.count}}
+
+) 
+  console.log("3", ...apdatedFlosses);
+ const filteredWishList = collection.wishList.filter(item => item.number !== apdatedFlosses.find(floss => item.number.toLowerCase() === floss.number.toLowerCase() &&
+ item.label.toLowerCase() === floss.label.toLowerCase())?.number)
+
+    const newWishList = [...filteredWishList, ...apdatedFlosses];
+    console.log("4", newWishList);
+    // console.log(flossList, req.headers.collectionid);
     await UserCollection.findByIdAndUpdate(req.headers.collectionid, {
       wishList: newWishList,
     });
 
     res.status(200).json(collection.wishList);
   } catch (e) {
-    res.status(204).json({ message: "No wishes" });
+    res.status(400).json({ message: e.message });
     next(e);
   }
 };
@@ -54,7 +90,7 @@ const deleteOne = async (req, res, next) => {
 
   try {
     const collection = await UserCollection.findById(req.headers.collectionid);
-    console.log(collection.wishList, flossId);
+    // console.log(collection.wishList, flossId);
     const newWishList = collection.wishList.filter(
       (floss) => floss._id.toString() !== flossId
     );
@@ -71,7 +107,7 @@ const deleteOne = async (req, res, next) => {
 
 const deleteMany = async (req, res, next) => {
   const flossesIds = req.body;
-  console.log(flossesIds);
+  // console.log(flossesIds);
   try {
     const collection = await UserCollection.findById(req.headers.collectionid);
     const newWishList = [];
@@ -111,7 +147,7 @@ const deleteAll = async (req, res, next) => {
 
 const DeleteSchemaNeeded = async (req, res, next) => {
   const flosses = req.body;
-  console.log(flosses);
+  // console.log(flosses);
   try {
     const collection = await UserCollection.findById(req.headers.collectionid);
     const newWishList = [];
@@ -138,7 +174,7 @@ const updateOne = async (req, res, next) => {
 
   try {
     const collection = await UserCollection.findById(req.headers.collectionid);
-    console.log(collection.wishList, id, count);
+    // console.log(collection.wishList, id, count);
     const newWishList = collection.wishList.map((floss) => {
       if (floss._id.toString() === id) {
         return {
@@ -153,7 +189,7 @@ const updateOne = async (req, res, next) => {
     await UserCollection.findByIdAndUpdate(req.headers.collectionid, {
       wishList: newWishList,
     });
-    console.log(newWishList);
+    // console.log(newWishList);
     res.status(200).json(id);
   } catch (e) {
     res.status(204).json({ message: "No wishes" });

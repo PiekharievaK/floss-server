@@ -124,6 +124,17 @@ const addFloss = async (req, res, next) => {
   const addedFloss = req.body;
   try {
     const collection = await UserCollection.findById(collectionid);
+    if (
+      collection.wishList.find(
+        (item) =>
+          item.number.toLowerCase() === addedFloss.number.toLowerCase() &&
+          item.label.toLowerCase() === addedFloss.label.toLowerCase()
+      )
+    ) {
+      throw new Error(
+        "You already have this floss in your schema"
+      )
+    }
     const newCollection = collection.schemaCollection.map((schema) => {
       if (schema._id.toString() !== schemaid) {
         return schema;
@@ -159,7 +170,7 @@ const addFloss = async (req, res, next) => {
     res.status(200).json(collection.schemaCollection[schemaid]);
   } catch (e) {
     console.log(e);
-    res.status(204).json({ message: "No schemas" });
+    res.status(400).json({ message: e.message });
     next(e);
   }
 };
