@@ -122,18 +122,24 @@ const addImage = async (req, res, next) => {
 const addFloss = async (req, res, next) => {
   const { collectionid, schemaid } = req.headers;
   const addedFloss = req.body;
+  console.log(addedFloss);
   try {
     const collection = await UserCollection.findById(collectionid);
-    if (
-      collection.wishList.find(
-        (item) =>
-          item.number.toLowerCase() === addedFloss.number.toLowerCase() &&
-          item.label.toLowerCase() === addedFloss.label.toLowerCase()
+    const choisenSchema = collection.schemaCollection.find(
+      (schema) => schema._id.toString() === schemaid
+      );
+      console.log(choisenSchema);
+    if (choisenSchema.flossesList.find(
+        (labelList) =>
+          labelList.label.toLowerCase() === addedFloss.label.toLowerCase() &&
+          labelList.flosses.find(
+            (item) =>
+              item.number.toLowerCase() === addedFloss.number.toLowerCase()
+          )
       )
     ) {
-      throw new Error(
-        "You already have this floss in your schema"
-      )
+      // console.log(object);
+      throw new Error("You already have this floss in your schema");
     }
     const newCollection = collection.schemaCollection.map((schema) => {
       if (schema._id.toString() !== schemaid) {
