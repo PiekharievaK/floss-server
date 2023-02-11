@@ -50,7 +50,12 @@ const userCollectionSchema = Schema(
           urlFull: { type: String },
           deleteUrl: { type: String },
         },
-        status: {type: String, required: true, enum: ['Available', 'Done', 'Reserved'], default: 'Available'},
+        status: {
+          type: String,
+          required: true,
+          enum: ["Available", "Done", "Reserved"],
+          default: "Available",
+        },
 
         flossesList: [
           {
@@ -61,7 +66,7 @@ const userCollectionSchema = Schema(
         ],
       },
     ],
-    wishList:[
+    wishList: [
       {
         label: {
           type: String,
@@ -77,7 +82,7 @@ const userCollectionSchema = Schema(
           required: [true, "Set count for floss"],
         },
       },
-    ]
+    ],
   },
   { versionKey: false, timestamps: true }
 );
@@ -134,18 +139,15 @@ const updateValidate = Joi.object({
   method: Joi.string().required(),
 });
 
-
 // const updateFavorite = Joi.object({
 //   favorite: Joi.bool().required(),
 // });
 
-
 // Schemas validation
 
 const addSchemaValidate = Joi.object({
-  schema: {name: Joi.string().required()},
+  schema: { name: Joi.string().required() },
   collectionId: Joi.string().required(),
-
 });
 
 const addSchemaFlossesValidate = Joi.object({
@@ -155,29 +157,27 @@ const addSchemaFlossesValidate = Joi.object({
   count: Joi.number().required().messages({
     "any.required": `Floss count cannot be an empty field, it's required`,
   }),
-})
+});
 
 const addSchemaImageValidate = Joi.object({
   image: Joi.binary().required().messages({
     "any.required": `You should pick the image to save, it's required`,
-  })})
+  }),
+});
 
-  const addWishListValidate = Joi.object({
-    
-      number: Joi.string().min(1).max(30).required().messages({
-        "string.empty": `Floss number cannot be an empty field`,
-        "string.min": `Floss number should have a minimum length of {#limit}`,
-        "any.required": `Floss number is a required field`,
-      }),
-      label: Joi.string().required().messages({
-        "any.required": `Floss label cannot be an empty field, it's required`,
-      }),
-      count: Joi.number().required().messages({
-        "any.required": `Floss count cannot be an empty field, it's required`,
-      }),
-    
-  });
-
+const addWishListValidate = Joi.object({
+  number: Joi.string().min(1).max(30).required().messages({
+    "string.empty": `Floss number cannot be an empty field`,
+    "string.min": `Floss number should have a minimum length of {#limit}`,
+    "any.required": `Floss number is a required field`,
+  }),
+  label: Joi.string().required().messages({
+    "any.required": `Floss label cannot be an empty field, it's required`,
+  }),
+  count: Joi.number().required().messages({
+    "any.required": `Floss count cannot be an empty field, it's required`,
+  }),
+});
 
 const UserCollection = model("userscollection", userCollectionSchema);
 
@@ -191,5 +191,5 @@ module.exports = {
   addSchemaValidate,
   addSchemaFlossesValidate,
   addSchemaImageValidate,
-  addWishListValidate
+  addWishListValidate,
 };

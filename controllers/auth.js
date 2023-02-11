@@ -15,8 +15,8 @@ const { verifyValidate } = require("../models/user");
 const { sendEmail, verificationLetter } = require("../helpers/");
 const { UserCollection } = require("../models/userCollection");
 
-// const appLink = "https://floss-server.onrender.com"
-const appLink = "http://localhost:3001";
+const appLink = "https://floss.vercel.app"
+// const appLink = "http://localhost:3000";
 
 const signup = async (req, res, next) => {
   const { error } = userSignUpValidate.validate(req.body);
@@ -52,7 +52,7 @@ const signup = async (req, res, next) => {
         owner: user._id,
         flossCollection: [],
         schemaCollection: [],
-        wishList:[],
+        wishList: [],
       },
       { versionKey: false, timestamps: true }
     );
@@ -64,12 +64,29 @@ const signup = async (req, res, next) => {
         email,
         subscription: user.subscription,
         avatarURL: user.avatarURL,
-        linkToVerify: `${appLink}/users/verify/${verificationToken}`,
+        linkToVerify: `${appLink}/Verification#${verificationToken}`,
       },
     });
   } catch (e) {
     res.status(409).json({ message: e.message });
-    next(e);
+  }
+};
+
+const emailCheck = async (req, res, next) => {
+  const { email } = req.body;
+  try {
+    const verificationToken = v4();
+    await sendEmail(verificationLetter(email, verificationToken, appLink));
+    //  console.log(email, verificationToken, appLink)
+    res.status(201).json({
+      user: {
+        email,
+        linkToVerify: `${appLink}/Verification#${verificationToken}`,
+      },
+    });
+  } catch (e) {
+    console.log(e.message);
+    res.status(400).json({ message: e.message });
   }
 };
 
@@ -83,19 +100,17 @@ const login = async (req, res, next) => {
 
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-    const collection = await UserCollection.findOne({ owner: user._id });
-    const collectionId = collection._id;
-
+    console.log(user);
     if (!user || !bcrypt.compareSync(password, user.password)) {
       throw new Error("Email or password is wrong");
     }
 
     if (!user.verify) {
-      throw new Error(
-        `email is not verify, use this link to veryfy ${appLink}/users/verify/${user.verificationToken}`
-      );
+      throw new Error(`Email is not verify`);
     }
 
+    const collection = await UserCollection.findOne({ owner: user._id });
+    const collectionId = collection._id;
     const token = jwt.sign({ id: user._id }, SECRET_KEY, {
       expiresIn: "1h",
     });
@@ -113,7 +128,6 @@ const login = async (req, res, next) => {
     });
   } catch (e) {
     res.status(401).json({ message: e.message });
-    next(e);
   }
 };
 
@@ -190,7 +204,7 @@ const verify = async (req, res, next) => {
   const user = await User.findOne({ verificationToken });
   try {
     if (!user) {
-      throw new Error();
+      throw new Error(`Somthing wrong, verification link is wrong`);
     }
     await User.findByIdAndUpdate(user._id, {
       verify: true,
@@ -201,19 +215,21 @@ const verify = async (req, res, next) => {
       message: `User ${user.email} is verify`,
     });
   } catch (e) {
-    res.status(404).json({ message: "Not Found" });
+    res.status(400).json({ message: e.message });
   }
 };
 
 const resendVerify = async (req, res, next) => {
   const email = req.body.email;
+  console.log(req);
   const { error } = verifyValidate.validate({ email });
   if (error) {
     res.status(400).json(error.message);
-    return;
+    next(error.message);
   }
   try {
     const user = await User.findOne({ email });
+    console.log(user);
     if (!user) {
       throw new Error(`Email: "${email}" is not registered yet`);
     }
@@ -221,12 +237,13 @@ const resendVerify = async (req, res, next) => {
       throw new Error("Verification has already been passed");
     }
 
-    await sendEmail(verificationLetter(email, user.verificationToken));
+    await sendEmail(verificationLetter(email, user.verificationToken, appLink));
     res.status(200).json({
       message: "Verification mail is send again",
-      linkToVerify: `${appLink}/users/verify/${user.verificationToken}`,
+      linkToVerify: `${appLink}/Verification#${user.verificationToken}`,
     });
   } catch (e) {
+    console.log(e);
     res.status(400).json({ message: e.message });
   }
 };
@@ -239,4 +256,5 @@ module.exports = {
   avatars,
   verify,
   resendVerify,
+  emailCheck,
 };

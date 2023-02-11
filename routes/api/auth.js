@@ -19,4 +19,6 @@ router.get("/verify/:verificationToken", ctrl.auth.verify);
 
 router.post("/verify", ctrl.auth.resendVerify);
 
+router.post("/emailCheck", ctrl.auth.emailCheck);
+
 module.exports = router;
