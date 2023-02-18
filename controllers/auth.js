@@ -100,7 +100,7 @@ const login = async (req, res, next) => {
 
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-    console.log(user);
+    // console.log(user);
     if (!user || !bcrypt.compareSync(password, user.password)) {
       throw new Error("Email or password is wrong");
     }
@@ -148,13 +148,17 @@ const current = async (req, res, next) => {
     return;
   }
   const { login, email, subscription, _id } = req.user;
+  const token = jwt.sign({ id: _id }, SECRET_KEY, {
+    expiresIn: "1h",
+  });
+  await User.findByIdAndUpdate(_id, { token});
   const collection = await UserCollection.findOne({ owner: _id });
   const collectionId = collection._id;
-  // console.log(collection._id);
   res.status(200).json({
     status: "succes",
     code: 200,
     data: {
+      token,
       user: {
         _id: _id,
         collectionId,
@@ -221,7 +225,7 @@ const verify = async (req, res, next) => {
 
 const resendVerify = async (req, res, next) => {
   const email = req.body.email;
-  console.log(req);
+  // console.log(req);
   const { error } = verifyValidate.validate({ email });
   if (error) {
     res.status(400).json(error.message);
@@ -229,7 +233,7 @@ const resendVerify = async (req, res, next) => {
   }
   try {
     const user = await User.findOne({ email });
-    console.log(user);
+    // console.log(user);
     if (!user) {
       throw new Error(`Email: "${email}" is not registered yet`);
     }
