@@ -1,5 +1,8 @@
-const { UserCollection, addWishListValidate, changheWishListFlossValidate } = require("../models/userCollection");
-
+const {
+  UserCollection,
+  addWishListValidate,
+  changheWishListFlossValidate,
+} = require("../models/userCollection");
 
 const getAll = async (req, res, next) => {
   try {
@@ -20,7 +23,7 @@ const addOne = async (req, res, next) => {
     // console.log(error.details[0].message);
     throw new Error(`${error.details[0].message}`);
   }
-  
+
   try {
     const collection = await UserCollection.findById(req.headers.collectionid);
     if (
@@ -32,7 +35,7 @@ const addOne = async (req, res, next) => {
     ) {
       throw new Error(
         "You already have this floss. Please find it in your wish list and update count"
-      )
+      );
     }
     const newWishList = [...collection.wishList, floss];
     // console.log(newWishList);
@@ -44,11 +47,10 @@ const addOne = async (req, res, next) => {
     res.status(200).json(collection.wishList);
   } catch (e) {
     console.log(e.message);
-    res.status(400).json({message: e.message});
+    res.status(400).json({ message: e.message });
     // next(e);
   }
 };
-
 
 const addFromSchema = async (req, res, next) => {
   const flossList = req.body;
@@ -57,19 +59,34 @@ const addFromSchema = async (req, res, next) => {
     const collection = await UserCollection.findById(req.headers.collectionid);
     // console.log(collection);
 
-const apdatedFlosses = flossList.map(item=>{ const floss = collection.wishList.find(floss => item.number.toLowerCase() === floss.number.toLowerCase() &&
-  item.label.toLowerCase() === floss.label.toLowerCase())
-  if (floss){
-    // console.log("1", {number: floss.number, label: floss.label, _id: floss._id, count: Number(item.count)+ Number(floss.count)})
-return {number: item.number, label: item.label, _id: floss._id, count: (Number(item.count)+ Number(floss.count))}
-  } 
-  //  console.log("2",{number: item.number, label: item.label, count:item.count}); 
-   return {number: item.number, label: item.label, count:item.count}}
-
-) 
-  console.log("3", ...apdatedFlosses);
- const filteredWishList = collection.wishList.filter(item => item.number !== apdatedFlosses.find(floss => item.number.toLowerCase() === floss.number.toLowerCase() &&
- item.label.toLowerCase() === floss.label.toLowerCase())?.number)
+    const apdatedFlosses = flossList.map((item) => {
+      const floss = collection.wishList.find(
+        (floss) =>
+          item.number.toLowerCase() === floss.number.toLowerCase() &&
+          item.label.toLowerCase() === floss.label.toLowerCase()
+      );
+      if (floss) {
+        // console.log("1", {number: floss.number, label: floss.label, _id: floss._id, count: Number(item.count)+ Number(floss.count)})
+        return {
+          number: item.number,
+          label: item.label,
+          _id: floss._id,
+          count: Number(item.count) + Number(floss.count),
+        };
+      }
+      //  console.log("2",{number: item.number, label: item.label, count:item.count});
+      return { number: item.number, label: item.label, count: item.count };
+    });
+    // console.log("3", ...apdatedFlosses);
+    const filteredWishList = collection.wishList.filter(
+      (item) =>
+        item.number !==
+        apdatedFlosses.find(
+          (floss) =>
+            item.number.toLowerCase() === floss.number.toLowerCase() &&
+            item.label.toLowerCase() === floss.label.toLowerCase()
+        )?.number
+    );
 
     const newWishList = [...filteredWishList, ...apdatedFlosses];
     console.log("4", newWishList);
@@ -174,7 +191,7 @@ const updateOne = async (req, res, next) => {
     const { error } = changheWishListFlossValidate.validate(req.body);
     if (error) {
       // console.log(error.details[0].message);
-     throw new Error(`${error.details[0].message}`);
+      throw new Error(`${error.details[0].message}`);
     }
     const { id, count } = req.body;
     const collection = await UserCollection.findById(req.headers.collectionid);
@@ -196,8 +213,7 @@ const updateOne = async (req, res, next) => {
     // console.log(newWishList);
     res.status(200).json(id);
   } catch (e) {
-
-    res.status(400).json({ message: e.message});
+    res.status(400).json({ message: e.message });
     // next(e);
   }
 };

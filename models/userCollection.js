@@ -183,7 +183,6 @@ const changheWishListFlossValidate = Joi.object({
   id: Joi.string().required(),
 });
 
-
 const UserCollection = model("userscollection", userCollectionSchema);
 
 module.exports = {
@@ -197,5 +196,5 @@ module.exports = {
   addSchemaFlossesValidate,
   addSchemaImageValidate,
   addWishListValidate,
-  changheWishListFlossValidate
+  changheWishListFlossValidate,
 };

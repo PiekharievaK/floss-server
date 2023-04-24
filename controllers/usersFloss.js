@@ -7,8 +7,6 @@ const {
 } = require("../models/userCollection");
 const { DataFlosses } = require("../models/floss");
 
-
-
 const getAll = async (req, res, next) => {
   const collectionId = req.params.collectionId;
 
@@ -42,7 +40,6 @@ const getFlossById = async (req, res, next) => {
 const addNewFloss = async (req, res, next) => {
   const { collectionId, floss } = req.body;
   const userCollection = await UserCollection.findById(collectionId);
-
 
   try {
     if (!floss.customLabel) {
@@ -99,7 +96,7 @@ const addNewFloss = async (req, res, next) => {
       });
       res.status(201).json(labelFloss);
     } else {
-        await UserCollection.findByIdAndUpdate(collectionId, {
+      await UserCollection.findByIdAndUpdate(collectionId, {
         flossCollection: [...userCollection.flossCollection, floss],
       });
 
