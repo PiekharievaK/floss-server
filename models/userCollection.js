@@ -178,6 +178,11 @@ const addWishListValidate = Joi.object({
     "any.required": `Floss count cannot be an empty field, it's required`,
   }),
 });
+const changheWishListFlossValidate = Joi.object({
+  count: Joi.number().required(),
+  id: Joi.string().required(),
+});
+
 
 const UserCollection = model("userscollection", userCollectionSchema);
 
@@ -192,4 +197,5 @@ module.exports = {
   addSchemaFlossesValidate,
   addSchemaImageValidate,
   addWishListValidate,
+  changheWishListFlossValidate
 };

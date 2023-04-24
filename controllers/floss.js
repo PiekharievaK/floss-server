@@ -6,7 +6,7 @@ const getFlossCollection = async (req, res, next) => {
 
     res.status(200).json(collection);
   } catch (e) {
-    res.status(204).json({ message: "No contacts" });
+    res.status(204).json({ message: "No flosses" });
     next(e);
   }
 };

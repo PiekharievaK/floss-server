@@ -1,4 +1,4 @@
-const { UserCollection, addWishListValidate } = require("../models/userCollection");
+const { UserCollection, addWishListValidate, changheWishListFlossValidate } = require("../models/userCollection");
 
 
 const getAll = async (req, res, next) => {
@@ -100,7 +100,7 @@ const deleteOne = async (req, res, next) => {
 
     res.status(200).json(flossId);
   } catch (e) {
-    res.status(204).json({ message: "No wishes" });
+    res.status(400).json({ message: "No wishes" });
     next(e);
   }
 };
@@ -124,7 +124,7 @@ const deleteMany = async (req, res, next) => {
 
     res.status(200).json(flossesIds);
   } catch (e) {
-    res.status(204).json({ message: "No wishes" });
+    res.status(400).json({ message: "No wishes" });
     next(e);
   }
 };
@@ -140,7 +140,7 @@ const deleteAll = async (req, res, next) => {
 
     res.status(200).json(collection.wishList);
   } catch (e) {
-    res.status(204).json({ message: "No wishes" });
+    res.status(400).json({ message: "No wishes" });
     next(e);
   }
 };
@@ -164,15 +164,19 @@ const DeleteSchemaNeeded = async (req, res, next) => {
 
     res.status(200).json(flosses);
   } catch (e) {
-    res.status(204).json({ message: "No wishes" });
+    res.status(400).json({ message: "No wishes" });
     next(e);
   }
 };
 
 const updateOne = async (req, res, next) => {
-  const { id, count } = req.body;
-
   try {
+    const { error } = changheWishListFlossValidate.validate(req.body);
+    if (error) {
+      // console.log(error.details[0].message);
+     throw new Error(`${error.details[0].message}`);
+    }
+    const { id, count } = req.body;
     const collection = await UserCollection.findById(req.headers.collectionid);
     // console.log(collection.wishList, id, count);
     const newWishList = collection.wishList.map((floss) => {
@@ -192,8 +196,9 @@ const updateOne = async (req, res, next) => {
     // console.log(newWishList);
     res.status(200).json(id);
   } catch (e) {
-    res.status(204).json({ message: "No wishes" });
-    next(e);
+
+    res.status(400).json({ message: e.message});
+    // next(e);
   }
 };
 

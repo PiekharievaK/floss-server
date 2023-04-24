@@ -218,7 +218,7 @@ const deleteFloss = async (req, res, next) => {
     res.status(200).json(collection.schemaCollection);
   } catch (e) {
     console.log(e);
-    res.status(204).json({ message: e.message });
+    res.status(400).json({ message: e.message });
     next(e);
   }
 };
