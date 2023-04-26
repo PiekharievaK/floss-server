@@ -6,15 +6,15 @@ const upload = multer({ dest: "uploads/" });
 
 const router = express.Router();
 
-router.get("/:collectionId", ctrl.userSchemas.getAll);
+router.get("/:collectionId", auth, ctrl.userSchemas.getAll);
 
 // router.get("/:flossId", ctrl.userSchemas.getFlossById);
 
 router.post("/", auth, ctrl.userSchemas.addNewSchema);
-router.post("/image", upload.single("image"), ctrl.userSchemas.addImage);
-router.post("/floss", ctrl.userSchemas.addFloss);
-router.put("/deleteFloss", ctrl.userSchemas.deleteFloss);
-router.delete("/", ctrl.userSchemas.deleteSchema);
+router.post("/image", auth, upload.single("image"), ctrl.userSchemas.addImage);
+router.post("/floss", auth, ctrl.userSchemas.addFloss);
+router.put("/deleteFloss", auth, ctrl.userSchemas.deleteFloss);
+router.delete("/", auth, ctrl.userSchemas.deleteSchema);
 
 // router.put("/:collectionId", ctrl.userSchemas.updateFloss);
 

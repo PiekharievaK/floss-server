@@ -6,10 +6,10 @@ const router = express.Router();
 
 router.get("/", auth, ctrl.userWishList.getAll);
 router.post("/", auth, ctrl.userWishList.addOne);
-router.post("/schema", ctrl.userWishList.addFromSchema);
-router.delete("/", ctrl.userWishList.deleteAll);
-router.delete("/:flossId", ctrl.userWishList.deleteOne);
-router.patch("/", ctrl.userWishList.updateOne);
+router.post("/schema", auth, ctrl.userWishList.addFromSchema);
+router.delete("/", auth, ctrl.userWishList.deleteAll);
+router.delete("/:flossId", auth, ctrl.userWishList.deleteOne);
+router.patch("/", auth, ctrl.userWishList.updateOne);
 
 // router.patch("/schema/delete", ctrl.userWishList.updateStatusFloss);
 
