@@ -15,7 +15,7 @@ const { verifyValidate } = require("../models/user");
 const { sendEmail, verificationLetter } = require("../helpers/");
 const { UserCollection } = require("../models/userCollection");
 
-const appLink = "https://floss.vercel.app"
+const appLink = "https://floss.vercel.app";
 // const appLink = "http://localhost:3000";
 
 const signup = async (req, res, next) => {
@@ -137,7 +137,7 @@ const logout = async (req, res, next) => {
 
     res.status(204).json();
   } catch (e) {
-    res.status(404).json({ message: "Not found" });
+    res.status(400).json({ message: "Not found" });
     next(e);
   }
 };
@@ -151,7 +151,7 @@ const current = async (req, res, next) => {
   const token = jwt.sign({ id: _id }, SECRET_KEY, {
     expiresIn: "1h",
   });
-  await User.findByIdAndUpdate(_id, { token});
+  await User.findByIdAndUpdate(_id, { token });
   const collection = await UserCollection.findOne({ owner: _id });
   const collectionId = collection._id;
   res.status(200).json({

@@ -80,7 +80,7 @@ const addNewFloss = async (req, res, next) => {
 
       if (!labelFloss) {
         throw new Error(
-          `No this floss on our ${floss.label} collection, pleade add it like "Other", uou also can use ${floss.label} but in loverCase`
+          `No this floss on our ${floss.label} collection, please add it like "Other", you also can use ${floss.label} but in loverCase`
         );
       }
       const newFloss = {

@@ -15,7 +15,7 @@ app.use(logger(formatsLogger));
 app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
-app.use("/DMCflossCollection", flossRouter);
+app.use("/FlossCollection", flossRouter);
 app.use("/users", authRouter);
 app.use("/flosses", userFlossesRouter);
 app.use("/schemas",  userSchemasRouter);
