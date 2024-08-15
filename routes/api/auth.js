@@ -21,4 +21,10 @@ router.post("/verify", ctrl.auth.resendVerify);
 
 router.post("/emailCheck", ctrl.auth.emailCheck);
 
+router.post("/resetPassword", ctrl.auth.forgotPassword);
+
+
+
+
+
 module.exports = router;

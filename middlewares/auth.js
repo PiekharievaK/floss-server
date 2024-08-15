@@ -17,7 +17,7 @@ const auth = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    if (error.message === "Invalid signature") {error.status = 401;}
+    if (error.message === "Invalid signature" || error.message === "jwt malformed" ) {error.status = 401;}
     next(error)
 }
 };
