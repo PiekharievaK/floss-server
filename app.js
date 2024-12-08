@@ -6,7 +6,8 @@ const authRouter = require("./routes/api/auth");
 const flossRouter = require("./routes/api/floss");
 const userFlossesRouter = require("./routes/api/userFlosses");
 const userSchemasRouter = require("./routes/api/userSchemas");
-const userWishListRouter = require("./routes/api/userWishList")
+const userWishListRouter = require("./routes/api/userWishList");
+const profileRouter = require("./routes/api/userProfile")
 const app = express();
 
 const formatsLogger = app.get("env") === "development" ? "dev" : "short";
@@ -20,6 +21,7 @@ app.use("/users", authRouter);
 app.use("/flosses", userFlossesRouter);
 app.use("/schemas",  userSchemasRouter);
 app.use("/wishList",  userWishListRouter);
+app.use("/profile",  profileRouter);
 
 
 
@@ -33,6 +35,8 @@ app.use((req, res) => {
 });
 
 app.use((err, req, res, next) => {
+  if(err.status){res.status(err.status).json({ message: err.message })}
+else
   res.status(500).json({ message: err.message });
 });
 
