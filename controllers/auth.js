@@ -36,6 +36,7 @@ const signup = async (req, res, next) => {
       bcrypt.genSaltSync(10)
     );
     const password = hashPassword;
+
     // const avatarURL = gravatar.url(email);
     const avatarURL = `https://i.ibb.co/S351TY1/profilepic9.png`
     const verificationToken = v4();
