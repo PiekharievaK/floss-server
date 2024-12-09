@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const path = require("path");
 const fs = require("fs/promises");
 const Jimp = require("jimp");
-const gravatar = require("gravatar");
+// const gravatar = require("gravatar");
 const { v4 } = require("uuid");
 const { SECRET_KEY } = process.env;
 const {
@@ -12,11 +12,13 @@ const {
   userLogInValidate,
 } = require("../models/user");
 const { verifyValidate } = require("../models/user");
-const { sendEmail, verificationLetter } = require("../helpers/");
+const { sendEmail, verificationLetter,forgotPasswordLetter } = require("../helpers/");
 const { UserCollection } = require("../models/userCollection");
+
 
 const appLink = "https://floss.vercel.app";
 // const appLink = "http://localhost:3000"
+
 
 const signup = async (req, res, next) => {
   const { error } = userSignUpValidate.validate(req.body);
@@ -36,7 +38,9 @@ const signup = async (req, res, next) => {
       bcrypt.genSaltSync(10)
     );
     const password = hashPassword;
-    const avatarURL = "https://i.ibb.co/S351TY1/profilepic9.png";
+
+    // const avatarURL = gravatar.url(email);
+    const avatarURL = `https://i.ibb.co/S351TY1/profilepic9.png`
     const verificationToken = v4();
     const user = await User.create({
       email,
@@ -95,7 +99,7 @@ const login = async (req, res, next) => {
 
   try {
     if (error) {
-      throw new Error(error.message);
+     console.log(error.message);
     }
 
     const { email, password } = req.body;
@@ -143,6 +147,7 @@ const logout = async (req, res, next) => {
 };
 
 const current = async (req, res, next) => {
+  try{
   if (!req.user) {
     res.status(401).json({ message: "Not authorized" });
     return;
@@ -167,7 +172,10 @@ const current = async (req, res, next) => {
         subscription,
       },
     },
-  });
+  });}
+  catch(e){
+    console.log(e);
+  }
 };
 
 const avatars = async (req, res, next) => {
@@ -252,6 +260,33 @@ const resendVerify = async (req, res, next) => {
   }
 };
 
+const forgotPassword = async (req, res, next) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+  try {
+    if (!user) {
+      throw new Error(`Somthing wrong, user with this email is not found`);
+    }
+    const tempPassword = (new Date()).setDate((new Date()).getDate() + 1).toString(16)
+    console.log(tempPassword)
+    const token = jwt.sign({ id: user._id }, SECRET_KEY, {
+      expiresIn: "2h",
+    });
+    await User.findByIdAndUpdate(user._id, {  token: token, temporaryCode: tempPassword });
+console.log(user);
+    await sendEmail(forgotPasswordLetter(email, {...user, token: token, temporaryCode: tempPassword}, appLink));
+
+    res.status(200).json({
+      message: `User ${user.email} password is completely refresh`,
+    });
+  } catch (e) {
+    res.status(400).json({ message: e.message });
+  }
+};
+
+
+
+
 module.exports = {
   signup,
   login,
@@ -261,4 +296,5 @@ module.exports = {
   verify,
   resendVerify,
   emailCheck,
+  forgotPassword
 };
