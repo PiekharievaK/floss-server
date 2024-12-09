@@ -16,7 +16,7 @@ const { sendEmail, verificationLetter } = require("../helpers/");
 const { UserCollection } = require("../models/userCollection");
 
 const appLink = "https://floss.vercel.app";
-// const appLink = "http://localhost:3000";
+// const appLink = "http://localhost:3000"
 
 const signup = async (req, res, next) => {
   const { error } = userSignUpValidate.validate(req.body);
