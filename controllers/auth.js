@@ -63,7 +63,7 @@ const signup = async (req, res, next) => {
     try {                                                                                                                   
        await sendEmail(verificationLetter(email, verificationToken, appLink));                                               
      } catch (emailError) {                                                                                                  
-       console.log("Email sending failed:", emailError.message);                             F                                
+       console.log("Email sending failed:", emailError.message);                                                            
     }  
 
     res.status(201).json({
