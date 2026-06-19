@@ -60,8 +60,11 @@ const signup = async (req, res, next) => {
       },
       { versionKey: false, timestamps: true }
     );
-
-    await sendEmail(verificationLetter(email, verificationToken, appLink));
+    try {                                                                                                                   
+       await sendEmail(verificationLetter(email, verificationToken, appLink));                                               
+     } catch (emailError) {                                                                                                  
+       console.log("Email sending failed:", emailError.message);                             F                                
+    }  
 
     res.status(201).json({
       user: {
