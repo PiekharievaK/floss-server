@@ -57,8 +57,7 @@ const signup = async (req, res, next) => {
         flossCollection: [],
         schemaCollection: [],
         wishList: [],
-      },
-      { versionKey: false, timestamps: true }
+      }
     );
     try {                                                                                                                   
        await sendEmail(verificationLetter(email, verificationToken, appLink));                                               
